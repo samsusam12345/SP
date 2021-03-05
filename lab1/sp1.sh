@@ -29,12 +29,17 @@ do
 	else
 		echo "При создании образа возникла ошибка"
 	fi
-	echo "Образы в корневой папке:"
+	echo "Образы в текущем каталоге:"
 	ls *.iso
+	echo "Монтируем образ $imageName"
+	mkdir /mnt/iso_image
+	mount $imageName /mnt/iso_image
 	echo "Содержимое каталога, на основе которого был создан образ:"
 	ls $dirPath
-	echo "Содержимое образа:"
-	7z l $imageName
+	echo "Содержимое образа $imageName:"
+	ls /mnt/iso_image
+	umount /mnt/iso_image
+	rmdir /mnt/iso_image
 	echo "Завершить выполнения скрипта (y/n)"
 	read reply
 	if [ $reply = "y" ]
