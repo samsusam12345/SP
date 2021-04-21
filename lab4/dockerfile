@@ -1,0 +1,5 @@
+FROM ubuntu
+RUN apt -qq update && apt upgrade -y
+RUN apt -y install build-essential gcc-multilib g++
+COPY main.cpp text.txt /
+g++ -pthread main.cpp
