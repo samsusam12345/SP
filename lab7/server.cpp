@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     {
         while (1)
         {
-            n = recvfrom(server_socket, buffer, 255, 0, (struct sockaddr*)&client_addr, &socklen);
+            n = recvfrom(server_socket, buffer, 256, 0, (struct sockaddr*)&client_addr, &socklen);
             if (n < 0) error("Couldn't read from socket");
             printf("Received UDP: \"%s\" from %s\n", buffer, inet_ntoa(client_addr.sin_addr));
             sendto(server_socket, "Message received", 16, 0, (struct sockaddr*)&client_addr, socklen);
@@ -68,13 +68,13 @@ int main(int argc, char** argv)
         n = send(client_socket, "Message received", 16, 0);
         if (n < 0) error("Couldn't write to socket");
     }
-    #ifdef _WIN32
+#ifdef _WIN32
     closesocket(client_socket);
     closesocket(server_socket);
-    #else
+#else
     close(client_socket);
     close(server_socket);
-    #endif
-    
+#endif
+
     return 0;
 }
