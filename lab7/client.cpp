@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     //memcpy((char *) &serv_addr, (char *) &addr, sizeof(addr));
     serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
     serv_addr.sin_port = htons(port);
-    int serv_addr_len = sizeof(serv_addr);
+    socklen_t serv_addr_len = sizeof(serv_addr);
     if (sock_type == SOCK_DGRAM)
     {
             char message[256] = "UDP message";
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
             if (n < 0) error("Couldn't write to socket");
             n = recvfrom(sockfd, message, 255, 0, (struct sockaddr*)&serv_addr, &serv_addr_len);
             if (n < 0) error("Couldn't read from socket");
-            printf("Server %s replies: %s", inet_ntoa(serv_addr.sin_addr), message);
+            printf("Server %s replies: %s\n", inet_ntoa(serv_addr.sin_addr), message);
     }
     else
     {
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
         if (n < 0) error("Couldn't write to socket");
         n = recv(sockfd, message, 255, 0);
         if (n < 0) error("Couldn't read from socket");
-        printf("Server %s replies: %s", inet_ntoa(serv_addr.sin_addr), message);
+        printf("Server %s replies: %s\n", inet_ntoa(serv_addr.sin_addr), message);
     }
     #ifdef _WIN32
     closesocket(sockfd);
