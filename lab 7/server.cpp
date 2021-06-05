@@ -2,33 +2,34 @@
 #include <WinSock2.h>
 #pragma comment(lib, "ws2_32.lib")
 #pragma warning(disable: 4996)
+#include <ws2tcpip.h>
 #else // unix
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
-#include <stdio.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #endif
 #include <cctype>
-#include <arpa/inet.h>
+#include <stdio.h>
 #include <string.h>
 
-void error(const char *msg)
+void error(const char* msg)
 {
-    #ifdef _Win32
+#ifdef _Win32
     WSACleanup();
-    #endif
+#endif
     perror(msg);
     exit(1);
 }
 
-int main(int argc,char **argv)
+int main(int argc, char** argv)
 {
-    #ifdef _WIN32
+#ifdef _WIN32
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) error("WSAStartup failed");
-    #endif
+#endif
     if (argc != 3) error("Wrong arguments");
     int sock_type, n;
     if (strcmp(argv[2], "TCP") == 0) sock_type = SOCK_STREAM;
@@ -45,21 +46,21 @@ int main(int argc,char **argv)
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
-    if (bind(server_socket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) error("Couldn't bind socket");
+    if (bind(server_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) error("Couldn't bind socket");
     if (sock_type == SOCK_DGRAM)
     {
         while (1)
         {
-            n = recvfrom(server_socket, buffer, 512, 0,(struct sockaddr *) &client_addr, &socklen);
+            n = recvfrom(server_socket, buffer, 255, 0, (struct sockaddr*)&client_addr, &socklen);
             if (n < 0) error("Couldn't read from socket");
             printf("Received UDP: \"%s\" from %s\n", buffer, inet_ntoa(client_addr.sin_addr));
-            sendto(server_socket, "Message received", 16, 0, (struct sockaddr *) &client_addr, socklen);
+            sendto(server_socket, "Message received", 16, 0, (struct sockaddr*)&client_addr, socklen);
         }
     }
     listen(server_socket, 5);
     while (1)
     {
-        client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &socklen);
+        client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &socklen);
         if (client_socket < 0) error("Couldn't accept connection");
         n = recv(client_socket, buffer, 255, 0);
         if (n < 0) error("Couldn't read from socket");
@@ -67,7 +68,13 @@ int main(int argc,char **argv)
         n = send(client_socket, "Message received", 16, 0);
         if (n < 0) error("Couldn't write to socket");
     }
+    #ifdef _WIN32
+    closesocket(client_socket);
+    closesocket(server_socket);
+    #else
     close(client_socket);
     close(server_socket);
+    #endif
+    
     return 0;
 }
